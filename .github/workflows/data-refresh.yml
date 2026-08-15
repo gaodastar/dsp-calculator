@@ -1,0 +1,42 @@
+# 数据刷新：游戏版本更新后手动触发。
+# 重新抓取 dsp-wiki.com 的 protosets.json，重建数据集，跑全量测试，
+# 全绿后提交 Pull Request（人工确认数值后合并，触发主发布流水线）。
+name: refresh game data
+on:
+  workflow_dispatch:
+    inputs:
+      note:
+        description: 刷新原因（如游戏版本号）
+        required: false
+        default: manual refresh
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Refetch wiki data and rebuild dataset
+        run: |
+          node research/build-data.mjs --refresh
+          node research/build-web.mjs
+      - name: Run full test suite
+        run: npm test
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "data: refresh from dsp-wiki.com (${{ github.event.inputs.note }})"
+          branch: data-refresh
+          title: "数据刷新: ${{ github.event.inputs.note }}"
+          body: |
+            自动从 dsp-wiki.com 重新抓取 `Module:GameData/protosets.json` 并重建数据集。
+            全部测试已通过，请人工核对数值（游戏版本号、关键配方）后合并。
+          delete-branch: true

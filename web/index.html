@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>戴森球计划 · 产量量化计算器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span class="logo">🪐</span>
+    <h1>戴森球计划 · 产量量化计算器</h1>
+    <span class="version" id="data-version"></span>
+  </div>
+  <div class="source">
+    数据来源: <a href="https://dsp-wiki.com/Module:GameData/protosets.json" target="_blank" rel="noopener">dsp-wiki.com</a>
+  </div>
+</header>
+
+<main>
+  <aside id="sidebar">
+    <div class="sidebar-title">🪐 物品图鉴</div>
+    <div class="sidebar-hint">直接浏览下方分类，<b>点击物品</b>即可开始计算</div>
+    <div class="search-row">
+      <input id="search" type="search" placeholder="🔍 搜索过滤（可选）…" autocomplete="off">
+      <button id="btn-clear-search" title="清除搜索">✕</button>
+    </div>
+    <div id="item-list" class="item-list"></div>
+  </aside>
+
+  <section id="content">
+    <div id="error-banner" class="error hidden"></div>
+
+    <div class="card target-card">
+      <div class="target-left">
+        <img id="target-icon" class="icon-lg" alt="">
+        <div class="target-info">
+          <div class="target-name" id="target-name">—</div>
+          <div class="target-en" id="target-en"></div>
+        </div>
+      </div>
+      <div class="target-rate">
+        <label>目标产量</label>
+        <div class="rate-row">
+          <input id="rate" type="number" min="0.1" step="1" value="60">
+          <span class="unit">个 / 分钟</span>
+        </div>
+        <div class="presets" id="presets"></div>
+      </div>
+      <div class="target-actions">
+        <button id="btn-detail" class="ghost">ℹ 物品详情</button>
+        <button id="btn-compute" class="primary">重新计算</button>
+      </div>
+    </div>
+
+    <div class="card" id="detail-card" style="display:none"></div>
+
+    <div class="card settings">
+      <h2>⚙ 全局设置</h2>
+      <div class="settings-grid">
+        <label>熔炼炉
+          <select id="m-smelt"></select>
+        </label>
+        <label>制造台
+          <select id="m-assemble"></select>
+        </label>
+        <label>化工厂
+          <select id="m-chemical"></select>
+        </label>
+        <label>研究站
+          <select id="m-research"></select>
+        </label>
+        <label>采矿机
+          <select id="m-mining"></select>
+        </label>
+        <label>增殖剂
+          <select id="m-prolif"></select>
+        </label>
+        <label>增殖模式
+          <select id="m-prolif-mode"><option value="extra">增产（多产物）</option><option value="speed">加速（快生产）</option></select>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="m-selfspray" checked> 增殖剂自我喷涂
+        </label>
+        <label>每台采矿机覆盖矿脉
+          <input type="number" id="m-veins" min="1" max="12" value="1">
+        </label>
+        <label>原油渗出点产量/分
+          <input type="number" id="m-oil" min="6" step="6" value="120">
+        </label>
+        <label>分馏传送带
+          <select id="m-fbelt"></select>
+        </label>
+        <label>分馏氢堆叠层数
+          <select id="m-fstack"><option>1</option><option>2</option><option>3</option><option selected>4</option></select>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="m-lens"> 射线接收站加装引力透镜
+        </label>
+      </div>
+    </div>
+
+    <div class="card" id="overrides-card" style="display:none">
+      <h2>🔀 生产方式覆盖（对产线中每种物品可选）</h2>
+      <div id="overrides" class="settings-grid"></div>
+    </div>
+
+    <div id="summary" class="summary"></div>
+
+    <div class="card">
+      <h2>🏭 生产设施</h2>
+      <div class="table-wrap"><table id="t-factories" class="result-table">
+        <thead><tr><th>配方</th><th>投入 → 产出（/分钟）</th><th>机器</th><th class="num">机器数</th><th class="num">电力</th><th>科技</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </div>
+
+    <div class="card" id="extract-card" style="display:none">
+      <h2>⛏ 采集设施</h2>
+      <div class="table-wrap"><table id="t-extract" class="result-table">
+        <thead><tr><th>资源</th><th>来源</th><th>设施</th><th class="num">数量</th><th class="num">产量/分</th><th class="num">电力</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </div>
+
+    <div class="card" id="raw-card" style="display:none">
+      <h2>🪨 原材料需求（每分钟 · 单件）</h2>
+      <div class="table-wrap"><table id="t-raw" class="result-table">
+        <thead><tr><th>物品</th><th>来源</th><th class="num">需求/分</th><th class="num">需求/件</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </div>
+
+    <div class="card" id="surplus-card" style="display:none">
+      <h2>♻ 副产物 / 盈余</h2>
+      <div class="table-wrap"><table id="t-surplus" class="result-table">
+        <thead><tr><th>物品</th><th class="num">盈余/分</th><th>说明</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </div>
+
+    <div class="card" id="external-card" style="display:none">
+      <h2>📦 外部供应（产线无法生产）</h2>
+      <div class="table-wrap"><table id="t-external" class="result-table">
+        <thead><tr><th>物品</th><th class="num">需求/分</th><th>备注</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </div>
+
+    <div class="card" id="flow-card" style="display:none">
+      <h2>🌊 全物品流量</h2>
+      <div class="table-wrap"><table id="t-flow" class="result-table">
+        <thead><tr><th>物品</th><th class="num">产出/分</th><th class="num">消耗/分</th><th class="num">净流量/分</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  数据版本 <span id="footer-version"></span> · 配方/物品数据来自 <a href="https://dsp-wiki.com/Module:GameData/protosets.json" target="_blank" rel="noopener">dsp-wiki.com</a> · 中文名来自 wiki.biligame.com/dsp ·
+  本工具为粉丝制作，与 Youthcat Studio 无关联，数据与图标版权归原作者所有 ·
+  <a href="https://github.com/gaodastar/dsp-calculator" target="_blank" rel="noopener">GitHub</a>
+</footer>
+
+<script src="data.js"></script>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

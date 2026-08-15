@@ -1,0 +1,22 @@
+{
+  "name": "dsp-calculator",
+  "version": "1.0.0",
+  "description": "戴森球计划 (Dyson Sphere Program) 全物品产量量化计算器 — 数据来自 dsp-wiki.com",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build-data": "node research/build-data.mjs",
+    "refresh-data": "node research/build-data.mjs --refresh",
+    "build-web": "node research/build-web.mjs",
+    "fetch-icons": "node research/fetch-icons.mjs",
+    "test": "node tests/engine.test.mjs && node tests/web-smoke.test.mjs && node tests/browser.test.mjs",
+    "serve": "node research/serve.mjs",
+    "cli": "node cli/calc.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0"
+  }
+}

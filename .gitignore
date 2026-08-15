@@ -1,0 +1,6 @@
+node_modules/
+.npm-cache/
+research/raw/
+dist/
+*.log
+.DS_Store
