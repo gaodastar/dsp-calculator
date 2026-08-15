@@ -45,8 +45,14 @@ node cli/calc.mjs 宇宙矩阵 60 --json                  # JSON 输出
 npm run build-data    # 从 dsp-wiki.com 抓取并生成 data/dsp-data.json
 npm run build-web     # 生成 web/data.js 与 web/engine.js
 npm run fetch-icons   # 从 wiki 下载物品图标
-npm test              # 24 项引擎测试 + Web 冒烟测试 + jsdom 真实浏览器交互测试
+npm test              # 26 项引擎测试 + Web 冒烟测试 + jsdom 真实浏览器交互测试
 ```
+
+### 自动发布
+
+- 推送 main 即触发 GitHub Actions：`npm ci → 构建 → 全量测试 → 发布 GitHub Pages`
+- 沙箱/本机自动推送通道：`research\push.cmd`（走 Windows 原生 OpenSSH，凭据在 `.ssh/`、`.ssh-home/`，均已 gitignore）
+- 手动数据刷新：Actions 页面 → "refresh game data" → Run workflow（重新抓取 dsp-wiki 数据 → 测试 → 生成 PR）
 
 ## 项目结构
 
