@@ -4,3 +4,9 @@ research/raw/
 dist/
 *.log
 .DS_Store
+
+# 本机部署凭据/工具（绝不入库）
+.ssh/
+.ssh-home/
+.gh-config/
+tools/
