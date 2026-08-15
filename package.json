@@ -10,6 +10,7 @@
     "build-web": "node research/build-web.mjs",
     "fetch-icons": "node research/fetch-icons.mjs",
     "test": "node tests/engine.test.mjs && node tests/web-smoke.test.mjs && node tests/browser.test.mjs",
+    "test:live": "node tests/live-acceptance.test.mjs",
     "serve": "node research/serve.mjs",
     "cli": "node cli/calc.mjs"
   },
